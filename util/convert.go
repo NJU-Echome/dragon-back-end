@@ -41,10 +41,11 @@ func poValueToVoValue(poValue reflect.Value, voValue reflect.Value) {
 	poValue = reflect.Indirect(poValue)
 
 	if isNilPointer(voValue) {
-		voElemType := voValue.Type().Elem()
-		fmt.Printf("voValue: %v\n", voValue)
-		fmt.Printf("voType: %v\n", voValue.Type())
-		fmt.Printf("voElemType: %v\n", voElemType)
+		// voElemType := voValue.Type().Elem()
+		// fmt.Printf("voValue: %v\n", voValue)
+		// fmt.Printf("voType: %v\n", voValue.Type())
+		// fmt.Printf("voElemType: %v\n", voElemType)
+		// debug by gdr
 		voValue.Set(reflect.Indirect(reflect.New(voValue.Type())))
 	}
 
@@ -52,10 +53,10 @@ func poValueToVoValue(poValue reflect.Value, voValue reflect.Value) {
 
 	voType := voValue.Type()
 
-	fmt.Printf("\n%v %v \n", poValue.Type(), voType)
+	// fmt.Printf("\n%v %v \n", poValue.Type(), voType)
 
 	if isSlice(voValue) {
-		fmt.Printf("%v is slice and prepare to convert from %v\n", voValue, poValue.Interface())
+		// fmt.Printf("%v is slice and prepare to convert from %v\n", voValue, poValue.Interface())
 		poListValueToVoListValue(poValue, voValue.Addr())
 		return
 	}
@@ -69,9 +70,9 @@ func poValueToVoValue(poValue reflect.Value, voValue reflect.Value) {
 		if !reflect.Indirect(poFieldvalue).IsValid() {
 			continue
 		}
-		fmt.Printf("%v\n", field.Name)
-		fmt.Printf("%v %v\n", poFieldvalue.Type(), voFieldValue.Type())
-		fmt.Printf("%v %v\n", poFieldvalue, voFieldValue)
+		// fmt.Printf("%v\n", field.Name)
+		// fmt.Printf("%v %v\n", poFieldvalue.Type(), voFieldValue.Type())
+		// fmt.Printf("%v %v\n", poFieldvalue, voFieldValue)
 		if voFieldValue.Type() != poFieldvalue.Type() {
 			poValueToVoValue(poFieldvalue, voFieldValue)
 		} else {
@@ -84,10 +85,10 @@ func poValueToVoValue(poValue reflect.Value, voValue reflect.Value) {
 func poListValueToVoListValue(poListValue reflect.Value, voListPtrValue reflect.Value) {
 	voListType := voListPtrValue.Type().Elem()
 	voListValue := reflect.Indirect(voListPtrValue)
-	fmt.Printf("voListType: %v\n", voListType)
-	fmt.Printf("volistValue: %v\n", voListValue)
+	// fmt.Printf("voListType: %v\n", voListType)
+	// fmt.Printf("volistValue: %v\n", voListValue)
 	voType := voListType.Elem()
-	fmt.Printf("voType: %v\n", voType)
+	// fmt.Printf("voType: %v\n", voType)
 	len := poListValue.Len()
 	for i := 0; i < len; i++ {
 		poValue := poListValue.Index(i)

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/astaxie/beego/orm"
 	"time"
 )
@@ -24,19 +25,48 @@ type Store struct {
 	Tags           []*Tag    `orm:"rel(m2m)"`
 }
 
-func GetStoresByCondition(tagId int, city string, district string) []Store {
+func GetStoresByCondition(tagIds []int, city string, district string) []Store {
 	o := orm.NewOrm()
 	var stores []Store
-	qs := o.QueryTable("store")
-	if district == "" {
-		qs.Filter("Tags__Tag__Id", tagId).Filter("city", city).All(&stores, "Id", "Name", "Address", "Latitude", "Longitude")
-	} else {
-		qs.Filter("Tags__Tag__Id", tagId).Filter("city", city).Filter("district", district).All(&stores, "Id", "Name", "Address", "Latitude", "Longitude")
+
+	sql := "select t1.id,name,address,latitude,longitude from store_tags t0 join store t1 on t1.id = t0.store_id where t1.city = '" + city + "' "
+	if district != "" {
+		sql += " and t1.district = '" + district + "' "
 	}
+	for i, value := range tagIds {
+		if i == 0 {
+			sql += " and tag_id = " + fmt.Sprintf("%d", value)
+		} else {
+			sql += " and exists(select 1 from store_tags where store_tags.tag_id = " + fmt.Sprintf("%d", value) + " and store_tags.store_id = t0.store_id)"
+		}
+
+	}
+	o.Raw(sql).QueryRows(&stores)
+	// qs := o.QueryTable("store")
+	// if district == "" {
+	// 	qs.Filter("Tags__Tag__Id__in", tagIds).Filter("city", city).All(&stores, "Id", "Name", "Address", "Latitude", "Longitude")
+	// } else {
+	// 	qs.Filter("Tags__Tag__Id__in", tagIds).Filter("city", city).Filter("district", district).All(&stores, "Id", "Name", "Address", "Latitude", "Longitude")
+	// }
 	for index, store := range stores {
 		o.LoadRelated(&store, "Tags")
 		stores[index] = store
 	}
 	return stores
 
+}
+func GetStoresWithNoTag(city string, district string) []Store {
+	o := orm.NewOrm()
+	var stores []Store
+	qs := o.QueryTable("store")
+	if district == "" {
+		qs.Filter("city", city).All(&stores, "Id", "Name", "Address", "Latitude", "Longitude")
+	} else {
+		qs.Filter("city", city).Filter("district", district).All(&stores, "Id", "Name", "Address", "Latitude", "Longitude")
+	}
+	for index, store := range stores {
+		o.LoadRelated(&store, "Tags")
+		stores[index] = store
+	}
+	return stores
 }

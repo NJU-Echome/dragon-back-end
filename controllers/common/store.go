@@ -31,13 +31,34 @@ func (this *StoreController) Get() {
 		}
 		tagIds = append(tagIds, id)
 	}
-	data := make(map[string]interface{})
-	data["city"] = city
-	data["district"] = district
-	data["tags"] = tagIds
+	var storesResult []models.Store
 	var storeList []vo.Simple_store
-	stores := models.GetStoresByCondition(4, city, district)
-	util.PoListToVoList(stores, &storeList)
-	data["stores"] = storeList
-	this.RetData(data)
+	if len(tagIds) == 0 {
+		storesResult = models.GetStoresWithNoTag(city, district)
+	} else {
+		storesResult = models.GetStoresByCondition(tagIds, city, district)
+		// for i, value := range tagIds {
+		// 	if i == 0 {
+		// 		storesResult = models.GetStoresByCondition(value, city, district)
+		// 	} else {
+		// 		stores := models.GetStoresByCondition(value, city, district)
+		// 		for j, store := range storesResult {
+		// 			ok := 0
+		// 			for _, storeTmp := range stores {
+		// 				if store.Id == storeTmp.Id {
+		// 					ok = 1
+		// 					break
+		// 				}
+		// 			}
+		// 			if ok == 0 {
+		// 				// 删除该元素
+		// 				storesResult = append(storesResult[:j], storesResult[j+1:]...)
+		// 			}
+		// 		}
+		// 	}
+
+		// }
+	}
+	util.PoListToVoList(storesResult, &storeList)
+	this.RetData(storeList)
 }
